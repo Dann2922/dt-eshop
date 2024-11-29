@@ -3,8 +3,6 @@ import { NextResponse } from "next/server";
 
 import getCurrentUser from "@/actions/getCurrentUser";
 
-getCurrentUser
-
 export async function POST(request: Request) {
 
   const currentUser = await getCurrentUser();
@@ -15,18 +13,13 @@ export async function POST(request: Request) {
     return NextResponse.error();
   }
 
-
   const body = await request.json();
-  const { userId, invoiceNumber,
-    dueDate, totalAmount, products, createdAt,
-    updatedAt } = body;
+  const { user, invoiceNumber, price, quantity, totalAmount, product, createdAt, updatedAt   } = body;
 
   const invoice = await prisma.invoice.create({
-    data:{
-      userId, invoiceNumber, dueDate, totalAmount,
-      products, createdAt, updatedAt
-    },
+    data: body,
   });
+
   return NextResponse.json(invoice);
 }
 

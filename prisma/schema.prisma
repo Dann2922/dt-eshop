@@ -61,8 +61,7 @@ model Product {
   quantity    Int
   images      Image[]
   reviews     Review[]
-  invoice     Invoice? @relation(fields: [invoiceId], references: [id])
-  invoiceId   String?  @db.ObjectId
+  Invoice     Invoice[]
 }
 
 model Review {
@@ -124,14 +123,16 @@ enum Role {
 }
 
 model Invoice {
-  id            String    @id @default(auto()) @map("_id") @db.ObjectId
-  userId        String    @db.ObjectId
-  invoiceNumber String    @unique
-  dueDate       DateTime
+  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId        String   @db.ObjectId
+  invoiceNumber String   @unique
+  price         Float
+  quantity      Int
   totalAmount   Float
-  products      Product[] // Relation with Product
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  product       Product? @relation(fields: [productId], references: [id])
+  productId     String?  @db.ObjectId // Foreign key to Product
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade) // Relation with User
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }

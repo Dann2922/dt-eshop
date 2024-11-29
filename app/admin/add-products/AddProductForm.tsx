@@ -216,7 +216,9 @@ const AddProductForm = () => {
 
       return prev;
     });
-  }, []);
+  },
+    []
+  );
 
   return (
     <>
