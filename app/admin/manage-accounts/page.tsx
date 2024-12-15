@@ -1,8 +1,7 @@
 import Container from "@/app/components/Container";
-import ManageProducts from "./ManageProducts";
-import getProducts from "@/actions/getProducts";
 import getCurrentUser from "@/actions/getCurrentUser";
 import NullData from "@/app/components/NullData";
+import ManageAccounts from "./ManageAccounts";
 
 const ManageOrders = async () => {
   const currentUser = await getCurrentUser();
@@ -14,7 +13,7 @@ const ManageOrders = async () => {
   return (
     <div className="pt-8">
       <Container>
-        <ManageProducts products={[]}></ManageProducts>
+        <ManageAccounts accounts={[]}></ManageAccounts>
       </Container>
     </div>
   );

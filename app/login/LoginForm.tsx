@@ -64,7 +64,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ currentUser }) => {
 
   return (
     <>
-      <Heading title="Sign in to E~Shop" />
+      <Heading title="Sign in to DaTech.com" />
       <Button
         outline
         label="Continue with Google"
@@ -73,7 +73,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ currentUser }) => {
           signIn("google");
         }}
       />
-      <hr className="bg-slate-300 w-full h-px" />
+      {/* <hr className="bg-slate-300 w-full h-px" />
       <Input
         id="email"
         label="Email"
@@ -90,17 +90,17 @@ const LoginForm: React.FC<LoginFormProps> = ({ currentUser }) => {
         errors={errors}
         required
         type="password"
-      />
-      <Button
+      /> */}
+      {/* <Button
         label={isLoading ? "Loading" : "Login"}
         onClick={handleSubmit(onSubmit)}
-      />
-      <p className="text-sm">
+      /> */}
+      {/* <p className="text-sm">
         Do not have an account?{" "}
         <Link className="underline" href="/register">
           Sign Up
         </Link>
-      </p>
+      </p> */}
     </>
   );
 };

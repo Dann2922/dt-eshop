@@ -8,6 +8,7 @@ import {
   MdDns,
   MdFormatListBulleted,
   MdLibraryAdd,
+  MdPerson,
   MdReceipt,
 } from "react-icons/md";
 import { usePathname } from "next/navigation";
@@ -27,18 +28,18 @@ const AdminNav = () => {
               selected={pathname === "/admin"}
             />
           </Link>
-          <Link href="/admin/add-invoices">
+          <Link href="/admin/manage-accounts">
             <AdminNavItem
-              label="Add Invoice"
-              icon={MdLibraryAdd}
-              selected={pathname === "/admin/add-invoices"}
+              label="Manage accounts"
+              icon={MdPerson}
+              selected={pathname === "/admin/manage-accounts"}
             />
           </Link>
-          <Link href="/admin/manage-orders">
+          <Link href="/admin/manage-invoices">
             <AdminNavItem
               label="Manage Invoice"
               icon={MdReceipt}
-              selected={pathname === "/admin/manage-orders"}
+              selected={pathname === "/admin/manage-invoices"}
             />
           </Link>
           <Link href="/admin/manage-brands">

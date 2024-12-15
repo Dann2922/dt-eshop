@@ -7,6 +7,7 @@ import Heading from "@/app/components/Heading";
 import Status from "@/app/components/Status";
 import {
   MdAccessTimeFilled,
+  MdClose,
   MdDeliveryDining,
   MdDone,
   MdRemoveRedEye,
@@ -145,6 +146,12 @@ const ManageOrdersClient: React.FC<ManageOrdersClientProps> = ({ orders }) => {
             />
             <ActionBtn
               icon={MdRemoveRedEye}
+              onClick={() => {
+                router.push(`/order/${params.row.id}`);
+              }}
+            />
+            <ActionBtn
+              icon={MdClose}
               onClick={() => {
                 router.push(`/order/${params.row.id}`);
               }}

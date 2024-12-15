@@ -20,8 +20,13 @@ const AddInvoiceForm = ({ currentUser }: { currentUser: any }) => {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [isInvoiceCreated, setIsInvoiceCreated] = useState(false);
-  const [productOptions, setProductOptions] = useState([]);
-
+  // const [productOptions, setProductOptions] = useState([]);
+  const productOptions = [
+    { value: "1", label: "iPhone 16" },
+    { value: "2", label: "Airpods 2" },
+    { value: "3", label: "Macbook air M2" },
+    { value: "4", label: "Product 4" },
+  ];
   const {
     register,
     handleSubmit,
@@ -40,22 +45,22 @@ const AddInvoiceForm = ({ currentUser }: { currentUser: any }) => {
     },
   });
 
-  useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        const response = await axios.get("/api/product");
-        const products = response.data.map((product: any) => ({
-          value: product.id,
-          label: product.name,
-        }));
-        setProductOptions(products);
-      } catch (error) {
-        console.error("Error fetching products:", error);
-        toast.error("Failed to load products.");
-      }
-    };
-    fetchProducts();
-  }, []);
+  // useEffect(() => {
+  //   const fetchProducts = async () => {
+  //     try {
+  //       const response = await axios.get("/api/product");
+  //       const products = response.data.map((product: any) => ({
+  //         value: product.id,
+  //         label: product.name,
+  //       }));
+  //       setProductOptions(products);
+  //     } catch (error) {
+  //       console.error("Error fetching products:", error);
+  //       toast.error("Failed to load products.");
+  //     }
+  //   };
+  //   fetchProducts();
+  // }, []);
 
   useEffect(() => {
     if (isInvoiceCreated) {
@@ -157,26 +162,6 @@ const AddInvoiceForm = ({ currentUser }: { currentUser: any }) => {
           register={register} errors={errors}
         />
         <br />
-        <Input
-          id="createdDate"
-          label="createdDate"
-          type="datetime-local"
-          disabled={isLoading}
-          value={0}
-          register={register} errors={errors}
-        />
-        <br />
-
-        <Input
-          id="updatedDate"
-          label="updatedDate"
-          type="datetime-local"
-          disabled={isLoading}
-          value={0}
-          register={register} errors={errors}
-        />
-        <br />
-
         <Button
           label={isLoading ? "Loading..." : "Add Invoice"}
           onClick={handleSubmit(onSubmit)}

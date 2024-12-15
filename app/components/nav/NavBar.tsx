@@ -7,9 +7,9 @@ import getCurrentUser from "@/actions/getCurrentUser";
 import Categories from "./Categories";
 import SearchBar from "./SearchBar";
 
-const redressed = Redressed({ subsets: ["latin"], weight: ["400"] });
+// const redressed = Redressed({ subsets: ["latin"], weight: ["400"] });
 
-// const fasterOne = Faster_One({ subsets: ["latin"], weight: ["400"] });
+const fasterOne = Faster_One({ subsets: ["latin"], weight: ["400"] });
 
 const NavBar = async () => {
   const currentUser = await getCurrentUser();
@@ -38,9 +38,9 @@ const NavBar = async () => {
           >
             <Link
               href="/"
-              className={`${redressed.className} font-bold text-2xl`}
+              className={`${fasterOne.className} font-bold text-2xl`}
             >
-              DaTech
+              DaTech.com
             </Link>
             <div className="hidden md:block"><SearchBar/></div>
             <div className="flex items-center gap-8 md:gap-12">
