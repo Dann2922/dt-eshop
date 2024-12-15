@@ -40,7 +40,7 @@
 //         id: product.id,
 //         name: product.name,
 //         price: formatPrice(product.price),
-//         quantity: product.quantity, 
+//         quantity: product.quantity,
 //         category: product.category,
 //         brand: product.brandId,
 //         inStock: product.inStock,
@@ -230,7 +230,9 @@ interface ManageProductsClientProps {
   products: any[]; // Updated to any type since we're faking the data
 }
 
-const ManageProductsClient: React.FC<ManageProductsClientProps> = ({ products }) => {
+const ManageProductsClient: React.FC<ManageProductsClientProps> = ({
+  products,
+}) => {
   const router = useRouter();
   const storage = getStorage(firebaseApp);
 
@@ -289,7 +291,9 @@ const ManageProductsClient: React.FC<ManageProductsClientProps> = ({ products })
       headerName: "Price(USD)",
       width: 100,
       renderCell: (params) => {
-        return <div className="font-bold text-slate-800">{params.row.price}</div>;
+        return (
+          <div className="font-bold text-slate-800">{params.row.price}</div>
+        );
       },
     },
     { field: "quantity", headerName: "Quantity", width: 70 },

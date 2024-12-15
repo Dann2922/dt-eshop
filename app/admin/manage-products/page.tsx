@@ -5,6 +5,7 @@ import getCurrentUser from "@/actions/getCurrentUser";
 import NullData from "@/app/components/NullData";
 
 const ManageOrders = async () => {
+  const products = await getProducts({ category: null });
   const currentUser = await getCurrentUser();
 
   if (!currentUser || currentUser.role !== "ADMIN") {
@@ -14,7 +15,7 @@ const ManageOrders = async () => {
   return (
     <div className="pt-8">
       <Container>
-        <ManageProducts products={[]}></ManageProducts>
+        <ManageProducts products={products}></ManageProducts>
       </Container>
     </div>
   );
