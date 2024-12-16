@@ -6,7 +6,6 @@ import NullData from "@/app/components/NullData";
 
 const AddInvoices = async () => {
   const currentUser = await getCurrentUser();
-  console.log("currentUser", currentUser)
 
   if (!currentUser || currentUser.role !== "ADMIN") {
     return <NullData title="Oops! Access denied" />;
@@ -16,7 +15,7 @@ const AddInvoices = async () => {
     <div className="p-8">
       <Container>
         <FormWrap>
-          <AddInvoiceForm currentUser={currentUser} />
+          <AddInvoiceForm />
         </FormWrap>
       </Container>
     </div>

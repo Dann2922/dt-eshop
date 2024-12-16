@@ -24,46 +24,12 @@ import AdminNavItem from "@/app/components/admin/AdminNavItem";
 import { Product } from "@prisma/client";
 
 interface ManageProductsProps {
-  products: Product[]; // Only include name in the Productss prop
+  products: Product[]; 
 }
 
 const ManageProducts: React.FC<ManageProductsProps> = ({ products }) => {
   const router = useRouter();
   const storage = getStorage(firebaseApp);
-
-  // Fake data for demonstration purposes
-  // const fakeProducts = [
-  //   {
-  //     id: "1",
-  //     name: "Fake Product 1",
-  //     price: 100,
-  //     quantity: 10,
-  //     category: "Electronics",
-  //     brand: "Brand A",
-  //     inStock: true,
-  //     // images: ["image1.jpg"],
-  //   },
-  //   {
-  //     id: "2",
-  //     name: "Fake Product 2",
-  //     price: 150,
-  //     quantity: 5,
-  //     category: "Clothing",
-  //     brand: "Brand B",
-  //     inStock: false,
-  //     // images: ["image2.jpg"],
-  //   },
-  //   {
-  //     id: "3",
-  //     name: "Fake Product 3",
-  //     price: 200,
-  //     quantity: 8,
-  //     category: "Home Goods",
-  //     brand: "Brand C",
-  //     inStock: true,
-  //     // images: ["image3.jpg"],
-  //   },
-  // ];
 
   const rows = products.map((product) => {
     return {
@@ -72,7 +38,7 @@ const ManageProducts: React.FC<ManageProductsProps> = ({ products }) => {
       price: formatPrice(product.price),
       quantity: product.quantity,
       category: product.category,
-      brand: product.brandId,
+      brand: product.brand?.name || "Unknown",
       inStock: product.inStock,
       images: product.images,
     };

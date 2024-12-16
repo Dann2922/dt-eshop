@@ -4,7 +4,7 @@ import getProducts from "@/actions/getProducts";
 import getCurrentUser from "@/actions/getCurrentUser";
 import NullData from "@/app/components/NullData";
 
-const ManageOrders = async () => {
+const ManageAllProducts = async () => {
   const products = await getProducts({ category: null });
   const currentUser = await getCurrentUser();
 
@@ -21,4 +21,4 @@ const ManageOrders = async () => {
   );
 };
 
-export default ManageOrders;
+export default ManageAllProducts;

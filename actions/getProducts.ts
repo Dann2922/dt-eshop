@@ -21,6 +21,7 @@ export default async function getProducts(params: IProductParams) {
     }
 
     const products = await prisma.product.findMany({
+
       where: {
         ...query,
         OR: [
@@ -40,10 +41,14 @@ export default async function getProducts(params: IProductParams) {
         reviews: {
           include: {
             user: true,
+            
           },
           orderBy: {
             createdDate: "desc",
           },
+        },
+        brand: {
+          select: { name: true },
         },
       },
     });

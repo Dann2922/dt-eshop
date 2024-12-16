@@ -1,95 +1,66 @@
 "use client";
 
-import { Order, User } from "@prisma/client";
+import { User } from "@prisma/client";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import Heading from "@/app/components/Heading";
-import {
-  MdAdd,
-  MdAdminPanelSettings,
-  MdCached,
-  MdClose,
-  MdDelete,
-  MdDeliveryDining,
-  MdDone,
-  MdEdit,
-  MdPerson,
-  MdRemoveRedEye,
-} from "react-icons/md";
+import { MdAdminPanelSettings, MdCached, MdPerson } from "react-icons/md";
 import ActionBtn from "@/app/components/ActionBtn";
 import { useCallback } from "react";
 import axios from "axios";
 import toast from "react-hot-toast";
 import { usePathname, useRouter } from "next/navigation";
-import Link from "@mui/material/Link";
-import AdminNavItem from "@/app/components/admin/AdminNavItem";
 import Status from "@/app/components/Status";
 
-interface ManageAccountProps {
-  accounts: ExtendedOrder[];
+interface ManageAccountsProps {
+  users: User[];
 }
 
-type ExtendedOrder = Order & {
-  user: User;
-};
-
-
-const ManageAccounts: React.FC<ManageAccountProps> = ({ accounts }) => {
+const ManageAccounts: React.FC<ManageAccountsProps> = ({ users }) => {
   const router = useRouter();
 
-
-  const rows = [
-    {
-      id:1,
-      name: "NTăng Trần",
-      email: "tangtran74119@gmail.com",
-      date: "2024-20-11",
-      role: "USER",
-    },
-    {
-      id: 2,
-      name: "Tran Ngoc Tang (FGW CT)",
-      email: "tangtngcc200110@fpt.edu.vn",
-      date: "2024-11-24",
-      role: "ADMIN",
-    },
-    {
-      id: 3,
-      name: "Dannie Tran",
-      email: "Dannie123@gmail.com",
-      date: "2024-25-11",
-      role: "USER",
-    },
-  ];
+  const rows = users.map((user) => {
+    return {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      createdAt: user.createdAt,
+      role: user.role,
+    };
+  });
 
   const columns: GridColDef[] = [
+    { field: "id", headerName: "ID", width: 1, hideable: true },
     { field: "name", headerName: "Account Name", width: 300 },
-    { field: "email", headerName: "Email", width: 300},
+    { field: "email", headerName: "Email", width: 200 },
     {
-      field: "date",
+      field: "createdAt",
       headerName: "Create Date",
-      width: 170,
+      width: 205,
     },
+
     {
-      field: "state",
+      field: "role",
       headerName: "State",
-      width: 120,
-    renderCell: (params) => {
-      // Check if the state is "ADMIN" or "USER" and render the appropriate Status component
-      return params.row.role === "ADMIN" ? (
-        <Status
-          icon={MdAdminPanelSettings}
-          text="ADMIN"
-          bg="bg-teal-200"
-          color="text-teal-700"
-        />
-      ) : (
-        <Status
-          icon={MdPerson}
-          text="USER"
-          bg="bg-rose-200"
-          color="text-rose-700"
-        />
-      );},},
+      width: 150,
+      renderCell: (params) => {
+        // Check if the state is "ADMIN" or "USER" and render the appropriate Status component
+        return params.row.role === "ADMIN" ? (
+          <Status
+            icon={MdAdminPanelSettings}
+            text="ADMIN"
+            bg="bg-teal-200"
+            color="text-teal-700"
+          />
+        ) : (
+          <Status
+            icon={MdPerson}
+            text="USER"
+            bg="bg-rose-200"
+            color="text-rose-700"
+          />
+        );
+      },
+    },
     {
       field: "action",
       headerName: "Actions",
@@ -101,7 +72,7 @@ const ManageAccounts: React.FC<ManageAccountProps> = ({ accounts }) => {
               icon={MdCached}
               onClick={() => {
                 // handleToggleStock(params.row.id, params.row.inStock);
-                handleAccountStateChange(params.row.id, params.row.role)
+                handleAccountRoleChange(params.row.id, params.row.role);
               }}
             />
           </div>
@@ -110,50 +81,37 @@ const ManageAccounts: React.FC<ManageAccountProps> = ({ accounts }) => {
     },
   ];
 
-  const handleDispatch = useCallback((id: string) => {
-    axios
-      .put("/api/order", {
-        id,
-        deliveryStatus: "dispatched",
-      })
-      .then((res) => {
-        toast.success("Order Dispatched");
-        router.refresh();
-      })
-      .catch((err) => {
-        toast.error("Oops! Something went wrong");
-        console.log(err);
-      });
-  }, []);
+  const handleAccountRoleChange = useCallback(
+    (id: string, currentRole: string) => {
+      // Determine the new role based on the current role
+      const newRole = currentRole === "USER" ? "ADMIN" : "USER";
 
-  const handleAccountStateChange = useCallback((accountId: string, currentState: string) => {
-    // Determine the new state based on the current state
-    const newState = currentState === "USER" ? "ADMIN" : "USER";
-  
-    // Ask for confirmation before changing the state
-    const confirmationMessage = currentState === "USER"
-      ? "Are you sure you want to change the account state to ADMIN?"
-      : "Are you sure you want to change the account state to USER?";
-    
-    if (confirm(confirmationMessage)) { // Built-in confirmation dialog
-      axios
-        .put("/api/account", {
-          accountId,
-          state: newState,
-        })
-        .then((res) => {
-          toast.success(`Account state changed to ${newState}`);
-          router.refresh(); // Refresh the page or update state to reflect changes
-        })
-        .catch((err) => {
-          toast.error("Failed to update account state");
-          console.error(err);
-        });
-    } else {
-      toast.info(`Account state remains ${currentState}`);
-    }
-  }, []);
-  
+      // Ask for confirmation before changing the role
+      const confirmationMessage =
+        currentRole === "USER"
+          ? "Are you sure you want to change the account role to ADMIN?"
+          : "Are you sure you want to change the account role to USER?";
+
+      if (confirm(confirmationMessage)) {
+        axios
+          .put("/api/user", {
+            id,
+            role: newRole,
+          })
+          .then((res) => {
+            toast.success(`Account role changed to ${newRole}`);
+            router.refresh();
+          })
+          .catch((err) => {
+            toast.error("Failed to change the account role");
+            console.error(err);
+          });
+      } else {
+        toast.success(`Account role remains ${currentRole}`);
+      }
+    },
+    []
+  );
 
   const pathname = usePathname();
 
@@ -162,8 +120,10 @@ const ManageAccounts: React.FC<ManageAccountProps> = ({ accounts }) => {
       <div className="mb-4 mt-8">
         <Heading title="Manage Accounts" center />
       </div>
-      <div className="flex justify-center items-center w-full"
-        style={{ height: 600, width: "100%" }}>
+      <div
+        className="flex justify-center items-center w-full"
+        style={{ height: 600, width: "100%" }}
+      >
         <DataGrid
           rows={rows}
           columns={columns}

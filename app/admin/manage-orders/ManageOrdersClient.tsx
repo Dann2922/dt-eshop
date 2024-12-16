@@ -136,6 +136,7 @@ const ManageOrdersClient: React.FC<ManageOrdersClientProps> = ({ orders }) => {
               icon={MdDeliveryDining}
               onClick={() => {
                 handleDispatch(params.row.id);
+                console.log("Send email");
               }}
             />
             <ActionBtn

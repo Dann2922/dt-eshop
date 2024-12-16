@@ -1,10 +1,12 @@
 import Container from "@/app/components/Container";
+import ManageInvoices from "./ManageInvoices";
+import getProducts from "@/actions/getProducts";
 import getCurrentUser from "@/actions/getCurrentUser";
 import NullData from "@/app/components/NullData";
-import getOrders from "@/actions/getOrders";
-import ManageInvoices from "./ManageInvoices";
+import getInvoices from "@/actions/getInvoices";
 
-const ManageOrders = async () => {
+const ManageAllInvoices = async () => {
+  const invoices = await getInvoices();
   const currentUser = await getCurrentUser();
 
   if (!currentUser || currentUser.role !== "ADMIN") {
@@ -14,10 +16,10 @@ const ManageOrders = async () => {
   return (
     <div className="pt-8">
       <Container>
-        <ManageInvoices invoices={[]}></ManageInvoices>
+        <ManageInvoices invoices={invoices}></ManageInvoices>
       </Container>
     </div>
   );
 };
 
-export default ManageOrders;
+export default ManageAllInvoices;

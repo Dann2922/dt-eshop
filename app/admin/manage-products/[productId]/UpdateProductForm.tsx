@@ -13,7 +13,12 @@ import { colors } from "@/utils/Colors";
 import { useCallback, useEffect, useState } from "react";
 import { FieldValues, SubmitHandler, useForm } from "react-hook-form";
 import toast from "react-hot-toast";
-import { getDownloadURL, getStorage, ref, uploadBytesResumable } from "firebase/storage";
+import {
+  getDownloadURL,
+  getStorage,
+  ref,
+  uploadBytesResumable,
+} from "firebase/storage";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import SelectBrand from "@/app/components/inputs/SelectBrand";
@@ -30,12 +35,13 @@ export type UploadedImageType = {
   image: string;
 };
 
-const AddProductForm = () => {
+const UpdateProductForm = ({ product }: { product: any }) => {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
-  const [images, setImages] = useState<ImageType[] | null>(null);
-  const [isProductCreated, setIsProductCreated] = useState(false);
+  const [images, setImages] = useState<ImageType[] | null>();
+  const [isProductUpdated, setIsProductUpdated] = useState(false);
   const [brandOptions, setBrandOptions] = useState([]);
+
 
   const {
     register,
@@ -48,26 +54,34 @@ const AddProductForm = () => {
     defaultValues: {
       name: "",
       description: "",
-      brandId: "",
+      brand: "",
       category: "",
       inStock: false,
       images: [],
-      price: 0,
-      quantity: 0,
+      price: "",
     },
   });
 
+  // Fetch the product data to prefill the form
   useEffect(() => {
-    setCustomValue("images", images);
-  }, [images]);
+    const fetchProductData = async (data: any) => {
+      try {
+        console.log(data);
+        setValue("name", data?.name);
+        setValue("description", data?.description);
+        setValue("brand", data?.brand);
+        setValue("category", data?.category);
+        setValue("inStock", data?.inStock);
+        setValue("price", data?.price);
+        setImages(data?.images);
+      } catch (error) {
+        toast.error("Failed to fetch product data");
+        console.log("Error fetching product data:", error);
+      }
+    };
 
-  useEffect(() => {
-    if (isProductCreated) {
-      reset();
-      setImages(null);
-      setIsProductCreated(false);
-    }
-  }, [isProductCreated]);
+    fetchProductData(product);
+  }, [product, setValue]);
 
   useEffect(() => {
     const fetchBrands = async () => {
@@ -85,11 +99,20 @@ const AddProductForm = () => {
     };
     fetchBrands();
   }, []);
+  useEffect(() => {
+    setCustomValue("images", images);
+  }, [images]);
+
+  useEffect(() => {
+    if (isProductUpdated) {
+      reset();
+      setImages(null);
+      setIsProductUpdated(false);
+    }
+  }, [isProductUpdated]);
 
   const onSubmit: SubmitHandler<FieldValues> = async (data) => {
-    console.log("Product Data", data);
-    // upload images to fb
-    // save product to mongodb
+    console.log("Updating Product Data", data);
     setIsLoading(true);
     let uploadedImages: UploadedImageType[] = [];
 
@@ -98,13 +121,7 @@ const AddProductForm = () => {
       return toast.error("Category is not selected!");
     }
 
-    if (!data.images || data.images.length === 0) {
-      setIsLoading(false);
-      return toast.error("No selected image!");
-    }
-
     const handleImageUploads = async () => {
-      toast("Creating product, please wait...");
       try {
         for (const item of data.images) {
           if (item.image) {
@@ -116,11 +133,7 @@ const AddProductForm = () => {
             await new Promise<void>((resolve, reject) => {
               uploadTask.on(
                 "state_changed",
-                (snapshot) => {
-                  const progress =
-                    (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-                  console.log("Upload is " + progress + "% done");
-                },
+                null,
                 (error) => {
                   console.log("Error uploading image", error);
                   reject(error);
@@ -141,6 +154,9 @@ const AddProductForm = () => {
                 }
               );
             });
+          } else {
+            // Keep existing image if not replaced
+            uploadedImages.push(item);
           }
         }
       } catch (error) {
@@ -150,39 +166,23 @@ const AddProductForm = () => {
       }
     };
 
-
     await handleImageUploads();
-    // const response = await axios.get(`/api/brand/${data.brand}`);
-    // data.brand = response.data;
-    const productData = { ...data, price: Number(data.price), images: uploadedImages };
+    const productData = { ...data, images: uploadedImages };
 
-    // try {
-    //   await axios.post("/api/product", productData);
-    //   toast.success("Product created");
-    //   setIsProductCreated(true);
-    //   router.refresh();
-    // } catch (error) {
-    //   toast.error("Something went wrong when saving product");
-    // } finally {
-    //   setIsLoading(false);
-    // }
-    try {
-      await axios.post("/api/product", productData);
-      toast.success("Product created");
-      setIsProductCreated(true);
-      // router.refresh();//refresh the page
-      router.push("/admin/manage-products");//move the management page
-    } catch (error: any) {
-      console.error("Error saving product:", error);
-      if (error.response?.data?.error) {
-        toast.error(error.response.data.error);
-      } else {
-        toast.error("Something went wrong. Please try again.");
-      }
-    } finally {
-      setIsLoading(false);
-    }
-
+    axios
+      .put(`/api/product/${product}`, productData)
+      .then(() => {
+        toast.success("Product updated successfully");
+        setIsProductUpdated(true);
+        router.refresh();
+      })
+      .catch((error) => {
+        toast.error("Something went wrong when updating the product");
+        console.log("Error updating product:", error);
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
   };
 
   const category = watch("category");
@@ -216,9 +216,7 @@ const AddProductForm = () => {
 
       return prev;
     });
-  },
-    []
-  );
+  }, []);
 
   return (
     <>
@@ -233,7 +231,6 @@ const AddProductForm = () => {
           required
         />
         <br />
-
         <Input
           id="price"
           label="Price"
@@ -243,7 +240,6 @@ const AddProductForm = () => {
           type="number"
           required
         />
-
         <br />
         <SelectBrand
           id="brandId"
@@ -255,16 +251,16 @@ const AddProductForm = () => {
           required
         />
         <br />
-
         <Input
           id="quantity"
           label="Quanity"
           type="number"
           disabled
           value={0} // This will set the quantity to 0
-          register={register} errors={errors}
-        />        <br />
-
+          register={register}
+          errors={errors}
+        />{" "}
+        <br />
         <TextArea
           id="description"
           label="Description"
@@ -272,14 +268,14 @@ const AddProductForm = () => {
           register={register}
           errors={errors}
           required
-        />        <br />
-
+        />{" "}
+        <br />
         <CustomCheckBox
           id="inStock"
           register={register}
           label="This product is in stock"
-        />        <br />
-
+        />{" "}
+        <br />
         <div className="w-full font-medium">
           <div className="mb-2 font-semibold">Select a Category</div>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-3 max-h[50vh] overflow-y-auto">
@@ -319,7 +315,7 @@ const AddProductForm = () => {
                   item={item}
                   addImageToState={addImageToState}
                   removeImageFromState={removeImageFromState}
-                  isProductCreated={isProductCreated}
+                  isProductCreated={isProductUpdated}
                 />
               );
             })}
@@ -334,4 +330,4 @@ const AddProductForm = () => {
   );
 };
 
-export default AddProductForm;
+export default UpdateProductForm;

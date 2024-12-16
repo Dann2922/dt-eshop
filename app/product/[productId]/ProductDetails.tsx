@@ -120,7 +120,7 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product }) => {
           <span className="font-semibold">BRAND:</span> {product.brand}
         </div>
         <div className={product.inStock ? "text-teal-400" : "text-rose-400"}>
-          {product.inStock ? "In stock" : "Out of stock"}
+          {product.inStock ? "In stock" : "Out of stock"  }
         </div>
         <Horizontal />
         {/* {isProductInCart ? (

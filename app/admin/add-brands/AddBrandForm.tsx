@@ -30,7 +30,7 @@ const AddBrandForm = () => {
     try {
       await axios.post("/api/brand", data);
       toast.success("Brand added successfully");
-      router.push("/admin/manage-brands");//move the management page
+      router.push("/admin/manage-brands"); //move the management page
     } catch (error) {
       console.error("Error adding brand:", error);
       toast.error("Something went wrong when adding the brand");

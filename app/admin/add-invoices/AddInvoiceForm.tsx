@@ -1,83 +1,132 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
-import { useForm, FieldValues, SubmitHandler } from "react-hook-form";
-import axios from "axios";
-import toast from "react-hot-toast";
+import Button from "@/app/components/Button";
 import Heading from "@/app/components/Heading";
 import Input from "@/app/components/inputs/Input";
-import TextArea from "@/app/components/inputs/TextArea";
-import Button from "@/app/components/Button";
+import { useEffect, useState } from "react";
+import { FieldValues, SubmitHandler, useForm } from "react-hook-form";
+import toast from "react-hot-toast";
+import axios from "axios";
+import { useRouter } from "next/navigation";
 import SelectProduct from "@/app/components/inputs/SelectProduct";
+import { v4 as uuidv4 } from "uuid";
+import { log } from "console";
 
-
-interface AddInvoiceFormProps {
-  currentUser: any;
-}
-
-const AddInvoiceForm = ({ currentUser }: { currentUser: any }) => {
+const AddInvoiceForm = () => {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
-  const [isInvoiceCreated, setIsInvoiceCreated] = useState(false);
-  // const [productOptions, setProductOptions] = useState([]);
-  const productOptions = [
-    { value: "1", label: "iPhone 16" },
-    { value: "2", label: "Airpods 2" },
-    { value: "3", label: "Macbook air M2" },
-    { value: "4", label: "Product 4" },
-  ];
+  const [productsOptions, setProductOptions] = useState([]);
+  const [userId, setUserId] = useState<string | null>(null);
+  const [selectedProductQuantity, setSelectedProductQuantity] = useState<
+    number | null
+  >(null);
+
+  // Fetch the current user's ID
+  const getCurrentUserId = async () => {
+    try {
+      const response = await axios.get("/api/current-user");
+      setUserId(response.data.userId); // Set userId in state
+    } catch (error) {
+      console.error("Error fetching user ID:", error);
+      toast.error("Failed to fetch current user ID.");
+    }
+  };
+
   const {
     register,
     handleSubmit,
     setValue,
     watch,
-    reset,
     formState: { errors },
   } = useForm<FieldValues>({
     defaultValues: {
-      userId: "",
-      invoiceNumber: "",
-      totalAmount: "",
-      products: [],
-      createdAt: "",
-      updatedAt: "",
+      userId: null,
+      invoiceNumber: uuidv4(),
+      price: 0,
+      quantity: 0,
+      totalAmount: 0,
+      productId: "",
     },
   });
 
-  // useEffect(() => {
-  //   const fetchProducts = async () => {
-  //     try {
-  //       const response = await axios.get("/api/product");
-  //       const products = response.data.map((product: any) => ({
-  //         value: product.id,
-  //         label: product.name,
-  //       }));
-  //       setProductOptions(products);
-  //     } catch (error) {
-  //       console.error("Error fetching products:", error);
-  //       toast.error("Failed to load products.");
-  //     }
-  //   };
-  //   fetchProducts();
-  // }, []);
+  const price = watch("price");
+  const quantity = watch("quantity");
+  const productId = watch("productId");
 
   useEffect(() => {
-    if (isInvoiceCreated) {
-      reset();
-      setIsInvoiceCreated(false);
+    setValue("totalAmount", price * quantity || 0); // Update totalAmount dynamically
+  }, [price, quantity, setValue]);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const response = await axios.get("/api/product");
+        const products = response.data.map((product: any) => ({
+          value: product.id,
+          label: product.name,
+        }));
+        setProductOptions(products);
+      } catch (error) {
+        console.error("Error fetching products:", error);
+        toast.error("Failed to load products.");
+      }
+    };
+
+    fetchProducts();
+    getCurrentUserId(); // Fetch current user ID
+  }, []);
+
+  useEffect(() => {
+    if (userId) {
+      setValue("userId", userId); // Update userId in form once fetched
     }
-  }, [isInvoiceCreated]);
+  }, [userId, setValue]);
+
+  useEffect(() => {
+    if (productId) {
+      // Fetch the product quantity when the product is selected
+      const fetchProductQuantity = async () => {
+        try {
+          const response = await axios.get(`/api/product/${productId}`);
+          setSelectedProductQuantity(response.data.quantity); // Update the quantity state
+        } catch (error) {
+          console.error("Error fetching product quantity:", error);
+          toast.error("Failed to fetch product quantity.");
+        }
+      };
+
+      fetchProductQuantity();
+    }
+  }, [productId]);
 
   const onSubmit: SubmitHandler<FieldValues> = async (data) => {
-    console.log("Invoice Data", data);
-
-    const invoiceData = { ...data, price: Number(data.price) };
+    setIsLoading(true);
 
     try {
-      await axios.post("/api/invoice", invoiceData);
-      toast.success("Invoice created");
-      setIsInvoiceCreated(true);
+      // Ensure price and quantity are numbers
+      const formattedData = {
+        ...data,
+        price: parseFloat(data.price),
+        quantity: parseInt(data.quantity, 10),
+        totalAmount: parseFloat(data.totalAmount), // Optional: to ensure it's a number
+      };
+
+      // Create the invoice
+      const response = await axios.post("/api/invoice", formattedData);
+
+      // After the invoice is created, update the product quantity
+      if (selectedProductQuantity !== null && productId) {
+        const newQuantity = selectedProductQuantity + formattedData.quantity; // Add the quantity
+
+        console.log("Selected Product Quantity:", selectedProductQuantity);
+        console.log("Quantity from Invoice:", formattedData.quantity);
+        console.log("New Quantity:", newQuantity);
+
+        // Update the product quantity in the database
+        await axios.put(`/api/product/update-quantity/${productId}`, { quantity: newQuantity });
+
+        toast.success("Invoice created and product quantity updated");
+      }
       router.push("/admin/manage-invoices");
     } catch (error: any) {
       console.error("Error saving invoice:", error);
@@ -89,79 +138,74 @@ const AddInvoiceForm = ({ currentUser }: { currentUser: any }) => {
     } finally {
       setIsLoading(false);
     }
-
   };
-
-  const Horizontal = () => {
-    return <hr className="w-[30%] my-2" />;
-  };
-
 
   return (
     <>
-      <Heading title="Add Invoice" center />
+      <Heading title="Add an Invoice" center />
       <form onSubmit={handleSubmit(onSubmit)}>
-        <Input
-          id="userId"
-          label=""
-          value={currentUser?.id}
-          disabled
-          type="hidden"
-          register={register}
-          errors={errors}
-        />
-        <br />
+        {/* Hidden userId field */}
+        <input type="hidden" {...register("userId")} />
+
+        {/* Invoice Number (disabled) */}
         <Input
           id="invoiceNumber"
           label="Invoice Number"
           disabled
-          type="text"
+          value={watch("invoiceNumber")}
           register={register}
           errors={errors}
-
         />
         <br />
-        <SelectProduct
-          id="productId"
-          label="Product"
-          options={productOptions}
-          disabled={isLoading}
-          register={register}
-          errors={errors}
-          required
-        /> 
-        <br />
+
+        {/* Price */}
         <Input
           id="price"
           label="Price"
+          type="number"
           disabled={isLoading}
           register={register}
           errors={errors}
-          type="number"
           required
         />
         <br />
 
+        {/* Quantity */}
         <Input
           id="quantity"
           label="Quantity"
+          type="number"
           disabled={isLoading}
           register={register}
           errors={errors}
-          type="number"
           required
         />
         <br />
 
-        <Input
-          id="totalAmount"
-          label="Total Disbursement"
-          type="text"
-          disabled
-          value={0}
-          register={register} errors={errors}
+        {/* Product Selection */}
+        <SelectProduct
+          id="productId"
+          label="Product"
+          options={productsOptions}
+          disabled={isLoading}
+          register={register}
+          errors={errors}
+          required
         />
         <br />
+
+        {/* Total Amount (disabled) */}
+        <Input
+          id="totalAmount"
+          label="Total Amount"
+          disabled
+          value={watch("totalAmount")}
+          register={register}
+          errors={errors}
+        />
+        <br />
+
+        {/* Submit Button */}
         <Button
           label={isLoading ? "Loading..." : "Add Invoice"}
           onClick={handleSubmit(onSubmit)}

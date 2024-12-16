@@ -21,7 +21,10 @@ export async function DELETE(
     return NextResponse.json(brand);
   } catch (error) {
     console.error("Error deleting brand:", error);
-    return NextResponse.json({ error: "Failed to delete brand" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to delete brand" },
+      { status: 500 }
+    );
   }
 }
 
@@ -51,11 +54,17 @@ export async function PUT(
     return NextResponse.json(brand);
   } catch (error) {
     console.error("Error updating brand:", error);
-    return NextResponse.json({ error: "Failed to update brand" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to update brand" },
+      { status: 500 }
+    );
   }
 }
 
-export async function GET(request: Request, { params }: { params: { id: string } }) {
+export async function GET(
+  request: Request,
+  { params }: { params: { id: string } }
+) {
   const currentUser = await getCurrentUser();
 
   if (!currentUser) return NextResponse.error();
@@ -64,6 +73,6 @@ export async function GET(request: Request, { params }: { params: { id: string }
     return NextResponse.error();
   }
 
-  const brand = await prisma.brand.findUnique({ where: { id: params.id } })
+  const brand = await prisma.brand.findUnique({ where: { id: params.id } });
   return NextResponse.json(brand);
 }

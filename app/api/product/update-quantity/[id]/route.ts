@@ -33,25 +33,9 @@ export async function PUT(
   if (currentUser.role !== "ADMIN") {
     return NextResponse.error();
   }
-
   const body = await request.json();
-  const { name, description, price, brand, category, inStock, images } = body;
 
-  const product = await prisma?.product.update({
-    data: {
-      name,
-      description,
-      brand,
-      category,
-      inStock,
-      images,
-      price: parseFloat(price),
-    },
-    where: {
-      id: params.id,
-    },
-  });
-  const updatedProduct = await prisma.product.update({
+  const product = await prisma.product.update({
     where: { id: params.id },
     data: { quantity: body.quantity }, // Update product quantity
   });

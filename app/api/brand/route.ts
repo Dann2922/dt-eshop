@@ -12,7 +12,7 @@ export async function POST(request: Request) {
   }
 
   const body = await request.json();
-  const { name} = body;
+  const { name } = body;
 
   const brand = await prisma.brand.create({
     data: {
@@ -32,6 +32,9 @@ export async function GET() {
     return NextResponse.json(brands);
   } catch (error) {
     // Handle errors gracefully
-    return NextResponse.json({ error: "Error fetching brands" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Error fetching brands" },
+      { status: 500 }
+    );
   }
 }

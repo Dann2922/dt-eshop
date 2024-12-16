@@ -14,13 +14,12 @@ export async function DELETE(
     return NextResponse.error();
   }
 
-  const product = await prisma?.product.delete({
+  const user = await prisma?.user.delete({
     where: { id: params.id },
   });
 
-  return NextResponse.json(product);
+  return NextResponse.json(user);
 }
-
 
 export async function PUT(
   request: Request,
@@ -35,28 +34,21 @@ export async function PUT(
   }
 
   const body = await request.json();
-  const { name, description, price, brand, category, inStock, images } = body;
+  const {name, email, createdAt, role } = body;
 
-  const product = await prisma?.product.update({
+  const user = await prisma?.user.update({
     data: {
       name,
-      description,
-      brand,
-      category,
-      inStock,
-      images,
-      price: parseFloat(price),
+      email,
+      createdAt,
+      role,
     },
     where: {
       id: params.id,
     },
   });
-  const updatedProduct = await prisma.product.update({
-    where: { id: params.id },
-    data: { quantity: body.quantity }, // Update product quantity
-  });
 
-  return NextResponse.json(product);
+  return NextResponse.json(user);
 }
 
 export async function GET(
@@ -75,7 +67,6 @@ export async function GET(
   if (!prisma) {
     return NextResponse.error();
   }
-
-  const product = await prisma.product.findUnique({ where: { id: params.id } });
-  return NextResponse.json(product);
+  const user = await prisma.user.findUnique({ where: { id: params.id } });
+  return NextResponse.json(user);
 }

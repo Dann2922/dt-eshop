@@ -12,29 +12,29 @@ export async function POST(request: Request) {
   }
 
   const body = await request.json();
-  const {
-    userId,
-    invoiceNumber,
-    price,
-    quantity,
-    totalAmount,
-    product,
-    createdAt,
-    updatedAt,
-  } = body;
+  const {name, email, createdAt, role } = body;
 
-  const invoice = await prisma.invoice.create({
+  const user = await prisma.user.create({
     data: body,
   });
 
-  
-  return NextResponse.json(invoice);
+  return NextResponse.json(user);
 }
 
-export async function PUT(request :Request) {
+export async function PUT(request: Request) {
   const currentUser = await getCurrentUser();
 
-  if(!currentUser || currentUser.role !== "ADMIN"){
+  if (!currentUser || currentUser.role !== "ADMIN") {
     return NextResponse.error();
   }
+
+  const body = await request.json();
+  const { id, role } = body;
+
+  const user = await prisma.user.update({
+    where: { id: id },
+    data: { role },
+  });
+
+  return NextResponse.json(user);
 }
